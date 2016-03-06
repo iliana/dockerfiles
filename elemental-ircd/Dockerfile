@@ -1,7 +1,7 @@
 FROM alpine:latest
 MAINTAINER Ian Weller <ianweller@buttslol.net>
 WORKDIR /home/ircd
-VOLUME /home/ircd/run/etc /home/ircd/run/logs
+VOLUME /home/ircd/run/logs
 ENTRYPOINT ["/home/ircd/run/bin/ircd", "-foreground"]
 
 ENV ELEMENTAL_VERSION=6.6.3
