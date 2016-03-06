@@ -4,8 +4,6 @@ WORKDIR /home/ircd
 VOLUME /home/ircd/run/logs
 ENTRYPOINT ["/home/ircd/run/bin/ircd", "-foreground"]
 
-ENV ELEMENTAL_VERSION=6.6.3
-
 RUN ELEMENTAL_VERSION="6.6.3" \
  && BUILD_PKGS="curl tar gcc make musl-dev bison flex openssl-dev file" \
  && apk add --no-cache openssl $BUILD_PKGS \
