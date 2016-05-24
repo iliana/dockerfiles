@@ -1,0 +1,4 @@
+#!/bin/ash -e
+for alg in ed25519 rsa ecdsa; do
+    ssh-keygen -f /host_keys/ssh_host_${alg}_key -N '' -t $alg
+done

@@ -1,0 +1,21 @@
+#!/bin/ash -e
+# There isn't a login.defs?
+UID_MIN=1000
+UID_MAX=60000 # maybe?
+
+# Add any users we don't have yet
+for user in $(ls /user_keys); do
+    if ! getent passwd $user >/dev/null; then
+        adduser -h /data -g '' -s /sbin/nologin -D -H $user
+        sed -ie "s/^$user:!:/$user:*:/" /etc/shadow
+    fi
+    install -o $user -g $user -m 0400 /user_keys/$user /etc/ssh/keys/$user
+done
+
+# Delete any users above UID_START without keys
+getent passwd | cut -d : -f 1,3 | tr : ' ' | while read user uid; do
+    if [ "$uid" -ge "$UID_MIN" -a "$uid" -le "$UID_MAX" -a ! -e "/user_keys/$user" ]; then
+        deluser $user
+        rm /etc/ssh/keys/$user
+    fi
+done
