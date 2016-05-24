@@ -20,7 +20,11 @@ $ docker run --rm -v /path/to/host_keys:/host_keys ianweller/sftp generate-host-
 Run the service:
 
 ```
-$ docker run -d --name sftp -p 2222:22 -v /path/to/host_keys:/host_keys:ro -v /path/to/user_keys:/user_keys:ro -v /var/data:/data ianweller/sftp
+$ docker run -d --name sftp -p 2222:22 \
+    -v /path/to/host_keys:/host_keys:ro \
+    -v /path/to/user_keys:/user_keys:ro \
+    -v /var/data:/data \
+    ianweller/sftp
 ```
 
 You can add, update, or remove keys and run `update-users`:
