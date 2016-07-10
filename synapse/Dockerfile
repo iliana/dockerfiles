@@ -1,4 +1,4 @@
-FROM alpine:edge
+FROM alpine:3.4
 MAINTAINER Ian Weller <ianweller@buttslol.net>
 
 RUN SYNAPSE_VERSION="0.16.1-r1" && BUILD_PKGS="py-pip python-dev openssl-dev gcc make musl-dev" \
