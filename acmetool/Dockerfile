@@ -4,9 +4,9 @@ WORKDIR /usr/local/bin
 VOLUME /var/lib/acme
 ENTRYPOINT ["/usr/local/bin/acmetool"]
 
-RUN ACME_VERSION="0.0.51" \
+RUN ACME_VERSION="0.0.56" \
  && BUILD_PKGS="curl tar python3-dev gcc musl-dev libffi-dev openssl-dev" \
- && apk add --no-cache python3 bind-tools $BUILD_PKGS \
+ && apk add --no-cache python3 bind-tools ca-certificates $BUILD_PKGS \
  && mkdir -p /usr/libexec/acme/hooks \
  && pyvenv /usr/libexec/acme/venv-dns.hook \
  && /usr/libexec/acme/venv-dns.hook/bin/pip install -U pip setuptools \
