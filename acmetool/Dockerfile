@@ -4,7 +4,7 @@ WORKDIR /usr/local/bin
 VOLUME /var/lib/acme
 ENTRYPOINT ["/usr/local/bin/acmetool"]
 
-RUN ACME_VERSION="0.0.56" \
+RUN ACME_VERSION="0.0.58" \
  && BUILD_PKGS="curl tar python3-dev gcc musl-dev libffi-dev openssl-dev" \
  && apk add --no-cache python3 bind-tools ca-certificates $BUILD_PKGS \
  && mkdir -p /usr/libexec/acme/hooks \
