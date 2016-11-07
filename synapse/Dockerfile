@@ -1,9 +1,10 @@
-FROM alpine:3.4
+FROM fedora:24
 
-RUN SYNAPSE_VERSION="0.18.2" && BUILD_PKGS="py-pip python-dev openssl-dev gcc make musl-dev linux-headers" \
- && apk upgrade --no-cache && apk add --no-cache ca-certificates python openssl py-setuptools py-cffi py-pillow py-lxml $BUILD_PKGS \
+RUN SYNAPSE_VERSION="0.18.2" && BUILD_PKGS="redhat-rpm-config libtiff-devel libjpeg-devel libzip-devel freetype-devel lcms2-devel libwebp-devel tcl-devel tk-devel lcms2-devel libwebp-devel tcl-devel tk-devel gcc gcc-c++ python-devel openssl-devel" \
+ && dnf install -y python openssl python-setuptools python-cffi python-pillow python-lxml python-psycopg2 $BUILD_PKGS \
  && pip install https://github.com/matrix-org/synapse/archive/v$SYNAPSE_VERSION.tar.gz \
- && apk del --rdepends $BUILD_PKGS \
- && rm -rf /root/.cache
+ && dnf remove -y $BUILD_PKGS \
+ && rm -rf /root/.cache \
+ && rm -rf /var/cache/dnf/*
 VOLUME ["/data"]
 CMD ["python", "-m", "synapse.app.homeserver", "--config-path", "/data/homeserver.yaml"]
