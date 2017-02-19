@@ -14,7 +14,7 @@ ssh-rsa AAAA... alice@wonderland
 Generate some host keys:
 
 ```
-$ docker run --rm -v /path/to/host_keys:/host_keys ianweller/sftp generate-host-keys
+$ docker run --rm -v /path/to/host_keys:/host_keys ilianaw/sftp generate-host-keys
 ```
 
 Run the service:
@@ -24,7 +24,7 @@ $ docker run -d --name sftp -p 2222:22 \
     -v /path/to/host_keys:/host_keys:ro \
     -v /path/to/user_keys:/user_keys:ro \
     -v /var/data:/data \
-    ianweller/sftp
+    ilianaw/sftp
 ```
 
 You can add, update, or remove keys and run `update-users`:

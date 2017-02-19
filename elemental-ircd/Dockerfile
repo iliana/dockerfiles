@@ -1,5 +1,4 @@
 FROM alpine:latest
-MAINTAINER Ian Weller <ianweller@buttslol.net>
 WORKDIR /home/ircd
 VOLUME /home/ircd/run/logs
 ENTRYPOINT ["/home/ircd/run/bin/ircd", "-foreground"]
