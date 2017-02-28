@@ -1,5 +1,5 @@
 FROM alpine:latest
-RUN NGINX_VERSION="1.11.10" && BORINGSSL_COMMIT="5c9d411e145d97698cdd12419edf581dfd9cd050" \
+RUN NGINX_VERSION="1.11.10" && BORINGSSL_COMMIT="218f51bcefd05444349933da6fa558082148526f" \
  && BUILDPKGS="cmake curl gcc g++ git gnupg go make musl-dev ninja pcre-dev perl zlib-dev" \
  && addgroup -S nginx && adduser -D -S -h /var/cache/nginx -s /sbin/nologin -G nginx nginx && rm /etc/passwd- /etc/group- /etc/shadow- \
  && apk add --no-cache $BUILDPKGS pcre zlib \
@@ -13,7 +13,7 @@ RUN NGINX_VERSION="1.11.10" && BORINGSSL_COMMIT="5c9d411e145d97698cdd12419edf581
  && rm -r "$GNUPGHOME" "nginx-$NGINX_VERSION.tar.gz.asc" \
  && tar xf "nginx-$NGINX_VERSION.tar.gz" && cd "nginx-$NGINX_VERSION" \
  && git clone https://boringssl.googlesource.com/boringssl && cd boringssl && git reset --hard "$BORINGSSL_COMMIT" \
- && mkdir build && cd build && cmake -GNinja -DCMAKE_BUILD_TYPE=Release .. && ninja && cd .. \
+ && mkdir build && cd build && cmake -GNinja -DCMAKE_BUILD_TYPE=Release .. && ninja run_tests && cd .. \
  && mkdir -p .openssl/lib && cp build/crypto/libcrypto.a build/ssl/libssl.a .openssl/lib/ \
  && ln -s ../include .openssl/ && cd .. \
  && ./configure --with-cc-opt="-Wno-incompatible-pointer-types" --user=nginx --group=nginx --with-openssl=boringssl \
