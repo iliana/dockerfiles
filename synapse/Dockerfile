@@ -6,5 +6,10 @@ RUN SYNAPSE_VERSION="0.19.2" && BUILD_PKGS="redhat-rpm-config libtiff-devel libj
  && dnf remove -y $BUILD_PKGS \
  && rm -rf /root/.cache \
  && rm -rf /var/cache/dnf/*
+RUN useradd docker
 VOLUME ["/data"]
-CMD ["python", "-m", "synapse.app.homeserver", "--config-path", "/data/homeserver.yaml"]
+EXPOSE 8448
+COPY start.sh /
+CMD /start.sh
+RUN chown docker:docker /data
+USER docker
