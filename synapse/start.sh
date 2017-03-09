@@ -12,4 +12,4 @@ then
             --report-stats=no
     )
 fi
-exec python -m synapse.app.homeserver --config-path /data/homeserver.yaml
+exec python -m synapse.app.homeserver --config-path /data/homeserver.yaml "$@"
