@@ -5,11 +5,11 @@ RUN SYNAPSE_VERSION="0.19.2" && BUILD_PKGS="redhat-rpm-config libtiff-devel libj
  && pip install https://github.com/matrix-org/synapse/archive/v$SYNAPSE_VERSION.tar.gz \
  && dnf remove -y $BUILD_PKGS \
  && rm -rf /root/.cache \
- && rm -rf /var/cache/dnf/*
-RUN useradd docker
+ && rm -rf /var/cache/dnf/* \
+ && groupadd -r -g 797 docker && useradd -r -g docker -u 797 docker \
+ && mkdir /data && chown docker:docker /data
 VOLUME ["/data"]
 EXPOSE 8448
 COPY start.sh /
 CMD /start.sh
-RUN chown docker:docker /data
 USER docker
