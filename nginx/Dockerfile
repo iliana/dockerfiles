@@ -1,5 +1,5 @@
 FROM alpine:latest
-RUN NGINX_VERSION="1.11.13" && BORINGSSL_COMMIT="adc15a79ad11d0917b3f317280439f1f664f347d" \
+RUN NGINX_VERSION="1.11.13" && BORINGSSL_COMMIT="d0b988219fe505822f16c99b8c5bfe65936d967c" \
  && BUILDPKGS="cmake curl gcc g++ git gnupg go make musl-dev ninja pcre-dev perl zlib-dev" \
  && addgroup -S nginx && adduser -D -S -h /var/cache/nginx -s /sbin/nologin -G nginx nginx && rm /etc/passwd- /etc/group- /etc/shadow- \
  && apk add --no-cache $BUILDPKGS pcre zlib \
