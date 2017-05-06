@@ -1,6 +1,7 @@
 FROM alpine:latest
-RUN NGINX_VERSION="1.11.13" && BORINGSSL_COMMIT="d0b988219fe505822f16c99b8c5bfe65936d967c" \
- && BUILDPKGS="cmake curl gcc g++ git gnupg go make musl-dev ninja pcre-dev perl zlib-dev" \
+ADD boringssl-tls1.3-default.patch /usr/src/
+RUN NGINX_VERSION="1.13.0" && BORINGSSL_COMMIT="c862c31f4c7627440ce5cf789d21c8074a37413e" \
+ && BUILDPKGS="cmake curl gcc g++ git gnupg go linux-headers make musl-dev ninja pcre-dev perl zlib-dev" \
  && addgroup -S nginx && adduser -D -S -h /var/cache/nginx -s /sbin/nologin -G nginx nginx && rm /etc/passwd- /etc/group- /etc/shadow- \
  && apk add --no-cache $BUILDPKGS pcre zlib \
  && curl -fSL -O "https://nginx.org/download/nginx-$NGINX_VERSION.tar.gz" \
@@ -13,6 +14,7 @@ RUN NGINX_VERSION="1.11.13" && BORINGSSL_COMMIT="d0b988219fe505822f16c99b8c5bfe6
  && rm -r "$GNUPGHOME" "nginx-$NGINX_VERSION.tar.gz.asc" \
  && tar xf "nginx-$NGINX_VERSION.tar.gz" && cd "nginx-$NGINX_VERSION" \
  && git clone https://boringssl.googlesource.com/boringssl && cd boringssl && git reset --hard "$BORINGSSL_COMMIT" \
+ && patch -p1 </usr/src/boringssl-tls1.3-default.patch \
  && mkdir build && cd build && cmake -GNinja -DCMAKE_BUILD_TYPE=Release .. && ninja run_tests && cd .. \
  && mkdir -p .openssl/lib && cp build/crypto/libcrypto.a build/ssl/libssl.a .openssl/lib/ \
  && ln -s ../include .openssl/ && cd .. \
