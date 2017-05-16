@@ -1,5 +1,5 @@
 FROM alpine:latest
-ADD boringssl-tls1.3-default.patch /usr/src/
+ADD boringssl-tls1.3-default.patch nginx-200-k.patch /usr/src/
 RUN NGINX_VERSION="1.13.0" && BORINGSSL_COMMIT="b056ed304d37b4f3103f7f77939b92629fbda729" \
  && BUILDPKGS="cmake curl gcc g++ git gnupg go linux-headers make musl-dev ninja pcre-dev perl zlib-dev" \
  && addgroup -S nginx && adduser -D -S -h /var/cache/nginx -s /sbin/nologin -G nginx nginx && rm /etc/passwd- /etc/group- /etc/shadow- \
@@ -18,6 +18,7 @@ RUN NGINX_VERSION="1.13.0" && BORINGSSL_COMMIT="b056ed304d37b4f3103f7f77939b9262
  && mkdir build && cd build && cmake -GNinja -DCMAKE_BUILD_TYPE=Release .. && ninja run_tests && cd .. \
  && mkdir -p .openssl/lib && cp build/crypto/libcrypto.a build/ssl/libssl.a .openssl/lib/ \
  && ln -s ../include .openssl/ && cd .. \
+ && patch -p1 </usr/src/nginx-200-k.patch \
  && ./configure --with-cc-opt="-Wno-incompatible-pointer-types" --user=nginx --group=nginx --with-openssl=boringssl \
         --prefix=/var/lib/nginx \
         --sbin-path=/usr/sbin/nginx \

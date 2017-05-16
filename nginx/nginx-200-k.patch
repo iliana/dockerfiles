@@ -1,0 +1,13 @@
+diff --git a/src/http/ngx_http_header_filter_module.c b/src/http/ngx_http_header_filter_module.c
+index 9b89405..c6bf52a 100644
+--- a/src/http/ngx_http_header_filter_module.c
++++ b/src/http/ngx_http_header_filter_module.c
+@@ -53,7 +53,7 @@ static u_char ngx_http_server_build_string[] = "Server: " NGINX_VER_BUILD CRLF;
+ 
+ static ngx_str_t ngx_http_status_lines[] = {
+ 
+-    ngx_string("200 OK"),
++    ngx_string("200 k"),
+     ngx_string("201 Created"),
+     ngx_string("202 Accepted"),
+     ngx_null_string,  /* "203 Non-Authoritative Information" */
