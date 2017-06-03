@@ -11,7 +11,7 @@ RUN NGINX_VERSION="1.13.0" && BORINGSSL_COMMIT="e7d3922b437e6e973b8d9202f6bebfd5
  # see https://nginx.org/en/pgp_keys.html
  && gpg --keyserver ha.pool.sks-keyservers.net --recv-keys B0F4253373F8F6F510D42178520A9993A1C052F8 \
  && gpg --batch --verify "nginx-$NGINX_VERSION.tar.gz.asc" "nginx-$NGINX_VERSION.tar.gz" \
- && rm -r "$GNUPGHOME" "nginx-$NGINX_VERSION.tar.gz.asc" \
+ && gpg-connect-agent killagent /bye && rm -r "$GNUPGHOME" "nginx-$NGINX_VERSION.tar.gz.asc" \
  && tar xf "nginx-$NGINX_VERSION.tar.gz" && cd "nginx-$NGINX_VERSION" \
  && git clone https://boringssl.googlesource.com/boringssl && cd boringssl && git reset --hard "$BORINGSSL_COMMIT" \
  && patch -p1 </usr/src/boringssl-tls1.3-default.patch \
