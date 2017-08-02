@@ -53,6 +53,10 @@ RUN NGINX_VERSION="1.13.3" && BORINGSSL_COMMIT="8d200744b4c47e25caa34e1791948538
  && touch boringssl/.openssl/include/openssl/ssl.h && make && make install \
  && cat objs/ngx_modules.c \
  && cd / && rm -r "nginx-$NGINX_VERSION" "nginx-$NGINX_VERSION.tar.gz" \
+ && mkdir -p /usr/lib/debug/usr/sbin && cd /usr/sbin \
+ && objcopy --only-keep-debug --compress-debug-sections nginx nginx.debug \
+ && objcopy --add-gnu-debuglink=nginx.debug nginx \
+ && mv nginx.debug /usr/lib/debug/usr/sbin/ && strip /usr/sbin/nginx && cd / \
  && apk del $BUILDPKGS \
  # forward request and error logs to docker log collector
  && ln -sf /dev/stdout /var/lib/nginx/logs/access.log \
