@@ -1,5 +1,5 @@
 FROM alpine:latest
-ADD boringssl-tls1.3-default.patch nginx-200-k.patch /usr/src/
+ADD boringssl-tls1.3-default.patch nginx-200-k.patch mdounin.asc /usr/src/
 RUN NGINX_VERSION="1.13.4" && BORINGSSL_COMMIT="348f0d8db9c2a0eca0503ba654020209c579d552" \
  && BUILDPKGS="cmake curl gcc g++ git gnupg go linux-headers make musl-dev ninja pcre-dev perl zlib-dev" \
  && addgroup -S nginx && adduser -D -S -h /var/cache/nginx -s /sbin/nologin -G nginx nginx && rm /etc/passwd- /etc/group- /etc/shadow- \
@@ -9,7 +9,7 @@ RUN NGINX_VERSION="1.13.4" && BORINGSSL_COMMIT="348f0d8db9c2a0eca0503ba654020209
  && export GNUPGHOME="$(mktemp -d)" \
  # key 520A9993A1C052F8: public key "Maxim Dounin <mdounin@mdounin.ru>"
  # see https://nginx.org/en/pgp_keys.html
- && gpg --keyserver ha.pool.sks-keyservers.net --recv-keys B0F4253373F8F6F510D42178520A9993A1C052F8 \
+ && gpg --import /usr/src/mdounin.asc \
  && gpg --batch --verify "nginx-$NGINX_VERSION.tar.gz.asc" "nginx-$NGINX_VERSION.tar.gz" \
  && gpg-connect-agent killagent /bye && rm -r "$GNUPGHOME" "nginx-$NGINX_VERSION.tar.gz.asc" \
  && tar xf "nginx-$NGINX_VERSION.tar.gz" && cd "nginx-$NGINX_VERSION" \
