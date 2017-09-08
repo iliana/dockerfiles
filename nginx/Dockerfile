@@ -1,6 +1,6 @@
 FROM alpine:latest
 ADD boringssl-tls1.3-default.patch nginx-200-k.patch mdounin.asc /usr/src/
-RUN NGINX_VERSION="1.13.4" && BORINGSSL_COMMIT="f21650709a6f76e829ddcc77fe221c9d6a5c12de" \
+RUN NGINX_VERSION="1.13.5" && BORINGSSL_COMMIT="6881ec04656ce1829136b3412afbf5f84287f476" \
  && BUILDPKGS="cmake curl gcc g++ git gnupg go make musl-dev ninja pcre-dev perl zlib-dev" \
  && addgroup -S nginx && adduser -D -S -h /var/cache/nginx -s /sbin/nologin -G nginx nginx && rm /etc/passwd- /etc/group- /etc/shadow- \
  && apk add --no-cache $BUILDPKGS pcre zlib \
