@@ -1,25 +1,33 @@
-FROM alpine:latest
-ADD boringssl-tls1.3-default.patch nginx-200-k.patch mdounin.asc /usr/src/
-RUN NGINX_VERSION="1.13.5" && BORINGSSL_COMMIT="6881ec04656ce1829136b3412afbf5f84287f476" \
- && BUILDPKGS="cmake curl gcc g++ git gnupg go make musl-dev ninja pcre-dev perl zlib-dev" \
- && addgroup -S nginx && adduser -D -S -h /var/cache/nginx -s /sbin/nologin -G nginx nginx && rm /etc/passwd- /etc/group- /etc/shadow- \
- && apk add --no-cache $BUILDPKGS pcre zlib \
- && curl -fSL -O "https://nginx.org/download/nginx-$NGINX_VERSION.tar.gz" \
- && curl -fSL -O "https://nginx.org/download/nginx-$NGINX_VERSION.tar.gz.asc" \
- && export GNUPGHOME="$(mktemp -d)" \
- # key 520A9993A1C052F8: public key "Maxim Dounin <mdounin@mdounin.ru>"
- # see https://nginx.org/en/pgp_keys.html
- && gpg --import /usr/src/mdounin.asc \
+FROM alpine:latest as boringssl-builder
+RUN apk update && apk upgrade && apk add cmake gcc g++ git go ninja perl
+RUN mkdir /usr/src && git clone https://boringssl.googlesource.com/boringssl /usr/src/boringssl \
+ && cd /usr/src/boringssl && git reset --hard 6881ec04656ce1829136b3412afbf5f84287f476
+WORKDIR /usr/src/boringssl
+COPY boringssl-tls1.3-default.patch /usr/src/
+RUN patch -p1 </usr/src/boringssl-tls1.3-default.patch
+RUN mkdir build && cd build && cmake -GNinja -DCMAKE_BUILD_TYPE=Release ..
+RUN cd build && ninja run_tests
+
+FROM alpine:latest as nginx-builder
+RUN apk update && apk upgrade && apk add curl gcc gnupg make musl-dev pcre-dev zlib-dev
+ENV NGINX_VERSION="1.13.5"
+WORKDIR /usr/src
+RUN curl -sSL -O "https://nginx.org/download/nginx-$NGINX_VERSION.tar.gz" \
+              -O "https://nginx.org/download/nginx-$NGINX_VERSION.tar.gz.asc"
+# key 520A9993A1C052F8: public key "Maxim Dounin <mdounin@mdounin.ru>"
+# see https://nginx.org/en/pgp_keys.html
+ADD mdounin.asc /usr/src/
+RUN gpg --import /usr/src/mdounin.asc \
  && gpg --batch --verify "nginx-$NGINX_VERSION.tar.gz.asc" "nginx-$NGINX_VERSION.tar.gz" \
- && gpg-connect-agent killagent /bye && rm -r "$GNUPGHOME" "nginx-$NGINX_VERSION.tar.gz.asc" \
- && tar xf "nginx-$NGINX_VERSION.tar.gz" && cd "nginx-$NGINX_VERSION" \
- && git clone https://boringssl.googlesource.com/boringssl && cd boringssl && git reset --hard "$BORINGSSL_COMMIT" \
- && patch -p1 </usr/src/boringssl-tls1.3-default.patch \
- && mkdir build && cd build && cmake -GNinja -DCMAKE_BUILD_TYPE=Release .. && ninja run_tests && cd .. \
- && mkdir -p .openssl/lib && cp build/crypto/libcrypto.a build/ssl/libssl.a .openssl/lib/ \
- && ln -s ../include .openssl/ && cd .. \
- && patch -p1 </usr/src/nginx-200-k.patch \
- && ./configure --with-cc-opt="-Wno-incompatible-pointer-types" --user=nginx --group=nginx --with-openssl=boringssl \
+ && gpg-connect-agent killagent /bye
+RUN tar xf "nginx-$NGINX_VERSION.tar.gz"
+WORKDIR /usr/src/nginx-$NGINX_VERSION
+COPY --from=boringssl-builder /usr/src/boringssl/build/crypto/libcrypto.a /usr/src/boringssl/build/ssl/libssl.a \
+        boringssl/.openssl/lib/
+COPY --from=boringssl-builder /usr/src/boringssl/include/openssl/* boringssl/.openssl/include/openssl/
+ADD nginx-200-k.patch /usr/src/
+RUN patch -p1 </usr/src/nginx-200-k.patch
+RUN ./configure --user=nginx --group=nginx --with-openssl=boringssl \
         --prefix=/var/lib/nginx \
         --sbin-path=/usr/sbin/nginx \
         --modules-path=/usr/lib/nginx/modules \
@@ -49,16 +57,26 @@ RUN NGINX_VERSION="1.13.5" && BORINGSSL_COMMIT="6881ec04656ce1829136b3412afbf5f8
         --without-http_upstream_ip_hash_module \
         --without-http_upstream_zone_module \
         --without-http_userid_module \
-        --without-http_uwsgi_module \
- && touch boringssl/.openssl/include/openssl/ssl.h && make && make install \
- && cat objs/ngx_modules.c \
- && cd / && rm -r "nginx-$NGINX_VERSION" "nginx-$NGINX_VERSION.tar.gz" \
- && mkdir -p /usr/lib/debug/usr/sbin && cd /usr/sbin \
- && objcopy --only-keep-debug --compress-debug-sections nginx nginx.debug \
+        --without-http_uwsgi_module
+RUN touch boringssl/.openssl/include/openssl/ssl.h \
+ && make -j install && cat objs/ngx_modules.c
+WORKDIR /usr/sbin
+RUN mkdir -p /usr/lib/debug/usr/sbin
+RUN objcopy --only-keep-debug --compress-debug-sections nginx nginx.debug \
  && objcopy --add-gnu-debuglink=nginx.debug nginx \
- && mv nginx.debug /usr/lib/debug/usr/sbin/ && strip /usr/sbin/nginx && cd / \
- && apk del $BUILDPKGS \
+ && mv nginx.debug /usr/lib/debug/usr/sbin/ && strip /usr/sbin/nginx
+
+FROM alpine:latest
+COPY --from=nginx-builder /usr/sbin/nginx /usr/sbin/
+COPY --from=nginx-builder /usr/lib/debug/usr/sbin/nginx.debug /usr/lib/debug/usr/sbin/
+COPY --from=nginx-builder /etc/nginx/* /etc/nginx/
+COPY --from=nginx-builder /var/lib/nginx/html/* /var/lib/nginx/html/
+RUN apk add --no-cache pcre zlib \
+ && addgroup -S nginx && adduser -D -S -h /var/cache/nginx -s /sbin/nologin -G nginx nginx \
+ && rm /etc/passwd- /etc/group- /etc/shadow- \
+ && mkdir -p /run/nginx /var/lib/nginx/logs \
  # forward request and error logs to docker log collector
  && ln -sf /dev/stdout /var/lib/nginx/logs/access.log \
- && ln -sf /dev/stderr /var/lib/nginx/logs/error.log
+ && ln -sf /dev/stderr /var/lib/nginx/logs/error.log \
+ && /usr/sbin/nginx -v
 ENTRYPOINT ["/usr/sbin/nginx", "-g", "daemon off;"]
