@@ -27,7 +27,7 @@ COPY --from=boringssl-builder /usr/src/boringssl/build/crypto/libcrypto.a /usr/s
 COPY --from=boringssl-builder /usr/src/boringssl/include/openssl/* boringssl/.openssl/include/openssl/
 ADD nginx-200-k.patch /usr/src/
 RUN patch -p1 </usr/src/nginx-200-k.patch
-RUN ./configure --user=nginx --group=nginx --with-openssl=boringssl \
+RUN CC="cc -flto" ./configure --user=nginx --group=nginx --with-openssl=boringssl \
         --prefix=/var/lib/nginx \
         --sbin-path=/usr/sbin/nginx \
         --modules-path=/usr/lib/nginx/modules \
