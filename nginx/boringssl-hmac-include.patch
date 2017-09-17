@@ -1,0 +1,38 @@
+From 43796d636378ab1a3d5dd8a99f728400ae225a65 Mon Sep 17 00:00:00 2001
+From: Iliana Weller <ilianaw@buttslol.net>
+Date: Sun, 17 Sep 2017 18:36:17 +0000
+Subject: [PATCH] Revert "Remove hmac.h include from ssl.h."
+
+This reverts commit 9a4876e19381a64f7a152c2ae7bd8d19d17fabac.
+---
+ include/openssl/ssl.h | 1 +
+ ssl/ssl_session.cc    | 1 -
+ 2 files changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/openssl/ssl.h b/include/openssl/ssl.h
+index 440c431..e9eb236 100644
+--- a/include/openssl/ssl.h
++++ b/include/openssl/ssl.h
+@@ -146,6 +146,7 @@
+ 
+ #include <openssl/bio.h>
+ #include <openssl/buf.h>
++#include <openssl/hmac.h>
+ #include <openssl/lhash.h>
+ #include <openssl/pem.h>
+ #include <openssl/span.h>
+diff --git a/ssl/ssl_session.cc b/ssl/ssl_session.cc
+index e885324..26d0b7b 100644
+--- a/ssl/ssl_session.cc
++++ b/ssl/ssl_session.cc
+@@ -142,7 +142,6 @@
+ #include <utility>
+ 
+ #include <openssl/err.h>
+-#include <openssl/hmac.h>
+ #include <openssl/lhash.h>
+ #include <openssl/mem.h>
+ #include <openssl/rand.h>
+-- 
+2.7.4
+

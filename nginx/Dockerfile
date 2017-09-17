@@ -1,10 +1,11 @@
 FROM alpine:latest as boringssl-builder
 RUN apk update && apk upgrade && apk add cmake gcc g++ git go ninja perl
 RUN mkdir /usr/src && git clone https://boringssl.googlesource.com/boringssl /usr/src/boringssl \
- && cd /usr/src/boringssl && git reset --hard 6881ec04656ce1829136b3412afbf5f84287f476
+ && cd /usr/src/boringssl && git reset --hard 82dfea8d9e65c4e57cc9fb2bd3f0dd49f5b31f45
 WORKDIR /usr/src/boringssl
-COPY boringssl-tls1.3-default.patch /usr/src/
-RUN patch -p1 </usr/src/boringssl-tls1.3-default.patch
+COPY boringssl-tls1.3-default.patch boringssl-hmac-include.patch /usr/src/
+RUN patch -p1 </usr/src/boringssl-tls1.3-default.patch \
+ && patch -p1 </usr/src/boringssl-hmac-include.patch
 RUN mkdir build && cd build && cmake -GNinja -DCMAKE_BUILD_TYPE=Release ..
 RUN cd build && ninja run_tests
 
@@ -16,7 +17,7 @@ RUN curl -sSL -O "https://nginx.org/download/nginx-$NGINX_VERSION.tar.gz" \
               -O "https://nginx.org/download/nginx-$NGINX_VERSION.tar.gz.asc"
 # key 520A9993A1C052F8: public key "Maxim Dounin <mdounin@mdounin.ru>"
 # see https://nginx.org/en/pgp_keys.html
-ADD mdounin.asc /usr/src/
+COPY mdounin.asc /usr/src/
 RUN gpg --import /usr/src/mdounin.asc \
  && gpg --batch --verify "nginx-$NGINX_VERSION.tar.gz.asc" "nginx-$NGINX_VERSION.tar.gz" \
  && gpg-connect-agent killagent /bye
@@ -25,7 +26,7 @@ WORKDIR /usr/src/nginx-$NGINX_VERSION
 COPY --from=boringssl-builder /usr/src/boringssl/build/crypto/libcrypto.a /usr/src/boringssl/build/ssl/libssl.a \
         boringssl/.openssl/lib/
 COPY --from=boringssl-builder /usr/src/boringssl/include/openssl/* boringssl/.openssl/include/openssl/
-ADD nginx-200-k.patch /usr/src/
+COPY nginx-200-k.patch /usr/src/
 RUN patch -p1 </usr/src/nginx-200-k.patch
 RUN CC="cc -flto" ./configure --user=nginx --group=nginx --with-openssl=boringssl \
         --prefix=/var/lib/nginx \
