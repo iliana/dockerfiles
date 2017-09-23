@@ -1,7 +1,7 @@
 FROM alpine:latest as boringssl-builder
 RUN apk update && apk upgrade && apk add cmake gcc g++ git go ninja perl
 RUN mkdir /usr/src && git clone https://boringssl.googlesource.com/boringssl /usr/src/boringssl \
- && cd /usr/src/boringssl && git reset --hard 82dfea8d9e65c4e57cc9fb2bd3f0dd49f5b31f45
+ && cd /usr/src/boringssl && git reset --hard e58f8a6b9ab6e990f0c273552f7b1411a3c6b0bc
 WORKDIR /usr/src/boringssl
 COPY boringssl-tls1.3-default.patch boringssl-hmac-include.patch /usr/src/
 RUN patch -p1 </usr/src/boringssl-tls1.3-default.patch \
