@@ -76,7 +76,6 @@ RUN apk add --no-cache pcre zlib \
  && addgroup -S nginx && adduser -D -S -h /var/cache/nginx -s /sbin/nologin -G nginx nginx \
  && rm /etc/passwd- /etc/group- /etc/shadow- \
  && mkdir -p /run/nginx /var/lib/nginx/logs \
- # forward request and error logs to docker log collector
  && ln -sf /dev/stdout /var/lib/nginx/logs/access.log \
  && ln -sf /dev/stderr /var/lib/nginx/logs/error.log \
  && /usr/sbin/nginx -v
