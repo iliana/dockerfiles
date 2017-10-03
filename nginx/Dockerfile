@@ -1,11 +1,10 @@
 FROM alpine:edge as boringssl-builder
 RUN apk update && apk upgrade && apk add cmake gcc g++ git go ninja perl
 RUN mkdir /usr/src && git clone https://boringssl.googlesource.com/boringssl /usr/src/boringssl \
- && cd /usr/src/boringssl && git reset --hard 81f030b10678bf5afd073f8898a61d469b424f6a
+ && cd /usr/src/boringssl && git reset --hard 51776b0aebcd658c0f8867eaf5bce5ac80afb4df
 WORKDIR /usr/src/boringssl
-COPY boringssl-tls1.3-default.patch boringssl-hmac-include.patch /usr/src/
-RUN patch -p1 </usr/src/boringssl-tls1.3-default.patch \
- && patch -p1 </usr/src/boringssl-hmac-include.patch
+COPY boringssl-*.patch /usr/src/
+RUN git -c user.name=builder -c user.email=builder@docker.invalid am /usr/src/boringssl-*.patch
 RUN mkdir build && cd build && cmake -GNinja -DCMAKE_BUILD_TYPE=Release ..
 RUN cd build && ninja run_tests
 
