@@ -3,7 +3,7 @@ if [ ! -f /data/homeserver.yaml ];
 then
     (
         cd /data
-        python -m synapse.app.homeserver \
+        /opt/synapse/bin/python -m synapse.app.homeserver \
             --generate-config \
             --server-name $SERVER_NAME \
             --keys-directory /data \
@@ -12,4 +12,4 @@ then
             --report-stats=no
     )
 fi
-exec python -m synapse.app.homeserver --config-path /data/homeserver.yaml "$@"
+exec /opt/synapse/bin/python -m synapse.app.homeserver --config-path /data/homeserver.yaml "$@"
