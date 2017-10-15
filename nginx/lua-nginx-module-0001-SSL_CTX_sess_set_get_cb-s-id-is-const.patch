@@ -1,0 +1,54 @@
+From df3a98e6f4ba6382803b0c7ba519c2da4170685d Mon Sep 17 00:00:00 2001
+From: Iliana Weller <ilianaw@buttslol.net>
+Date: Tue, 10 Oct 2017 00:26:47 -0700
+Subject: [PATCH] SSL_CTX_sess_set_get_cb's id is const
+
+... so fix the callback function's header, but ask GCC to not care about
+discarding the const qualifier.
+
+A better fix for this should be written. For now, I don't care.
+---
+ src/ngx_http_lua_ssl_session_fetchby.c | 5 ++++-
+ src/ngx_http_lua_ssl_session_fetchby.h | 2 +-
+ 2 files changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/src/ngx_http_lua_ssl_session_fetchby.c b/src/ngx_http_lua_ssl_session_fetchby.c
+index 3a3c1f54..883cdef1 100644
+--- a/src/ngx_http_lua_ssl_session_fetchby.c
++++ b/src/ngx_http_lua_ssl_session_fetchby.c
+@@ -171,7 +171,7 @@ ngx_http_lua_ssl_sess_fetch_by_lua(ngx_conf_t *cf, ngx_command_t *cmd,
+ 
+ /* cached session fetching callback to be set with SSL_CTX_sess_set_get_cb */
+ ngx_ssl_session_t *
+-ngx_http_lua_ssl_sess_fetch_handler(ngx_ssl_conn_t *ssl_conn, u_char *id,
++ngx_http_lua_ssl_sess_fetch_handler(ngx_ssl_conn_t *ssl_conn, const u_char *id,
+     int len, int *copy)
+ {
+     lua_State                       *L;
+@@ -287,7 +287,10 @@ ngx_http_lua_ssl_sess_fetch_handler(ngx_ssl_conn_t *ssl_conn, u_char *id,
+     cctx->exit_code = 1;  /* successful by default */
+     cctx->connection = c;
+     cctx->request = r;
++#pragma GCC diagnostic push
++#pragma GCC diagnostic ignored "-Wdiscarded-qualifiers"
+     cctx->session_id.data = id;
++#pragma GCC diagnostic pop
+     cctx->session_id.len = len;
+     cctx->entered_sess_fetch_handler = 1;
+     cctx->done = 0;
+diff --git a/src/ngx_http_lua_ssl_session_fetchby.h b/src/ngx_http_lua_ssl_session_fetchby.h
+index 5a6f96f5..bc6c8973 100644
+--- a/src/ngx_http_lua_ssl_session_fetchby.h
++++ b/src/ngx_http_lua_ssl_session_fetchby.h
+@@ -25,7 +25,7 @@ char *ngx_http_lua_ssl_sess_fetch_by_lua_block(ngx_conf_t *cf,
+     ngx_command_t *cmd, void *conf);
+ 
+ ngx_ssl_session_t *ngx_http_lua_ssl_sess_fetch_handler(
+-    ngx_ssl_conn_t *ssl_conn, u_char *id, int len, int *copy);
++    ngx_ssl_conn_t *ssl_conn, const u_char *id, int len, int *copy);
+ #endif
+ 
+ 
+-- 
+2.13.6
+

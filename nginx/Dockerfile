@@ -9,25 +9,32 @@ RUN mkdir build && cd build && cmake -GNinja -DCMAKE_BUILD_TYPE=Release ..
 RUN cd build && ninja run_tests
 
 FROM alpine:edge as nginx-builder
-RUN apk update && apk add curl gcc gnupg make musl-dev pcre-dev zlib-dev
+RUN apk update && apk add coreutils curl findutils gcc git gnupg luajit-dev make musl-dev pcre-dev zlib-dev
 ENV NGINX_VERSION="1.13.6"
 WORKDIR /usr/src
 RUN curl -sSL -O "https://nginx.org/download/nginx-$NGINX_VERSION.tar.gz" \
               -O "https://nginx.org/download/nginx-$NGINX_VERSION.tar.gz.asc"
 # key 520A9993A1C052F8: public key "Maxim Dounin <mdounin@mdounin.ru>"
 # see https://nginx.org/en/pgp_keys.html
-COPY mdounin.asc /usr/src/
+COPY mdounin.asc lua-nginx-module-*.patch nginx-200-k.patch strip-debug.sh /usr/src/
 RUN gpg --import /usr/src/mdounin.asc \
  && gpg --batch --verify "nginx-$NGINX_VERSION.tar.gz.asc" "nginx-$NGINX_VERSION.tar.gz" \
  && gpg-connect-agent killagent /bye
 RUN tar xf "nginx-$NGINX_VERSION.tar.gz"
+RUN git clone https://github.com/simpl/ngx_devel_kit && cd ngx_devel_kit \
+ && git reset --hard e443262071e759c047492be60ec7e2d73c5b57ec # v0.3.0
+RUN git clone https://github.com/openresty/lua-nginx-module && cd lua-nginx-module \
+ && git reset --hard 97fbeb0bef1aa85e758210d58063376de8eaed31 # v0.10.11rc2
+RUN cd lua-nginx-module \
+ && git -c user.name=builder -c user.email=builder@docker.invalid am /usr/src/lua-nginx-module-*.patch
 WORKDIR /usr/src/nginx-$NGINX_VERSION
 COPY --from=boringssl-builder /usr/src/boringssl/build/crypto/libcrypto.a /usr/src/boringssl/build/ssl/libssl.a \
         boringssl/.openssl/lib/
 COPY --from=boringssl-builder /usr/src/boringssl/include/openssl/* boringssl/.openssl/include/openssl/
-COPY nginx-200-k.patch /usr/src/
 RUN patch -p1 </usr/src/nginx-200-k.patch
-RUN CC="cc -flto" ./configure --user=nginx --group=nginx --with-openssl=boringssl \
+RUN CC="cc -flto" LUAJIT_LIB=/usr/lib LUAJIT_INC=/usr/include/luajit-2.1 \
+        ./configure --with-openssl=boringssl \
+        --user=nginx --group=nginx \
         --prefix=/var/lib/nginx \
         --sbin-path=/usr/sbin/nginx \
         --modules-path=/usr/lib/nginx/modules \
@@ -39,6 +46,8 @@ RUN CC="cc -flto" ./configure --user=nginx --group=nginx --with-openssl=boringss
         --http-fastcgi-temp-path=/var/cache/nginx/fastcgi_temp \
         --http-uwsgi-temp-path=/var/cache/nginx/uwsgi_temp \
         --http-scgi-temp-path=/var/cache/nginx/scgi_temp \
+        --add-dynamic-module=/usr/src/ngx_devel_kit \
+        --add-dynamic-module=/usr/src/lua-nginx-module \
         --with-http_ssl_module \
         --with-http_v2_module \
         --without-http_access_module \
@@ -61,19 +70,16 @@ RUN CC="cc -flto" ./configure --user=nginx --group=nginx --with-openssl=boringss
 RUN touch boringssl/.openssl/include/openssl/ssl.h \
  && make -j && cat objs/ngx_modules.c
 RUN make install DESTDIR=/buildroot
-WORKDIR /buildroot/usr/sbin
-RUN mkdir -p /buildroot/usr/lib/debug/usr/sbin
-RUN objcopy --only-keep-debug --compress-debug-sections nginx nginx.debug \
- && objcopy --add-gnu-debuglink=nginx.debug nginx \
- && mv nginx.debug /buildroot/usr/lib/debug/usr/sbin/ && strip nginx
+WORKDIR /buildroot
+RUN find -type f -executable -execdir /usr/src/strip-debug.sh {} \;
 
 FROM alpine:edge
 COPY --from=nginx-builder /buildroot/ /
-RUN apk add --no-cache pcre zlib \
+RUN apk add --no-cache luajit pcre zlib \
  && addgroup -S nginx && adduser -D -S -h /var/cache/nginx -s /sbin/nologin -G nginx nginx \
  && rm /etc/passwd- /etc/group- /etc/shadow- \
  && mkdir -p /run/nginx /var/lib/nginx/logs \
  && ln -sf /dev/stdout /var/lib/nginx/logs/access.log \
  && ln -sf /dev/stderr /var/lib/nginx/logs/error.log \
- && /usr/sbin/nginx -v
+ && /usr/sbin/nginx -V
 ENTRYPOINT ["/usr/sbin/nginx", "-g", "daemon off;"]
