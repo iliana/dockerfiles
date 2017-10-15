@@ -5,7 +5,7 @@ RUN mkdir /usr/src && git clone https://boringssl.googlesource.com/boringssl /us
 WORKDIR /usr/src/boringssl
 COPY boringssl-*.patch /usr/src/
 RUN git -c user.name=builder -c user.email=builder@docker.invalid am /usr/src/boringssl-*.patch
-RUN mkdir build && cd build && cmake -GNinja -DCMAKE_BUILD_TYPE=Release ..
+RUN mkdir build && cd build && cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=1 ..
 RUN cd build && ninja run_tests
 
 FROM alpine:edge as nginx-builder
@@ -28,12 +28,14 @@ RUN git clone https://github.com/openresty/lua-nginx-module && cd lua-nginx-modu
 RUN cd lua-nginx-module \
  && git -c user.name=builder -c user.email=builder@docker.invalid am /usr/src/lua-nginx-module-*.patch
 WORKDIR /usr/src/nginx-$NGINX_VERSION
-COPY --from=boringssl-builder /usr/src/boringssl/build/crypto/libcrypto.a /usr/src/boringssl/build/ssl/libssl.a \
+COPY --from=boringssl-builder /usr/src/boringssl/build/crypto/libcrypto.so /usr/src/boringssl/build/ssl/libssl.so \
         boringssl/.openssl/lib/
 COPY --from=boringssl-builder /usr/src/boringssl/include/openssl/* boringssl/.openssl/include/openssl/
 RUN patch -p1 </usr/src/nginx-200-k.patch
 RUN CC="cc -flto" LUAJIT_LIB=/usr/lib LUAJIT_INC=/usr/include/luajit-2.1 \
-        ./configure --with-openssl=boringssl \
+        ./configure \
+        --with-cc-opt=-I$(pwd)/boringssl/.openssl/include \
+        --with-ld-opt=-L$(pwd)/boringssl/.openssl/lib \
         --user=nginx --group=nginx \
         --prefix=/var/lib/nginx \
         --sbin-path=/usr/sbin/nginx \
@@ -70,6 +72,7 @@ RUN CC="cc -flto" LUAJIT_LIB=/usr/lib LUAJIT_INC=/usr/include/luajit-2.1 \
 RUN touch boringssl/.openssl/include/openssl/ssl.h \
  && make -j && cat objs/ngx_modules.c
 RUN make install DESTDIR=/buildroot
+RUN mkdir -p /buildroot/usr/lib && cp boringssl/.openssl/lib/*.so /buildroot/usr/lib/
 WORKDIR /buildroot
 RUN find -type f -executable -execdir /usr/src/strip-debug.sh {} \;
 
