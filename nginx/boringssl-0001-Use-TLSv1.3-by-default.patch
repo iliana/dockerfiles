@@ -1,7 +1,7 @@
-From fbfb20eaf4fe7d8aff47408bb171642a0b65bf10 Mon Sep 17 00:00:00 2001
+From 9fc35d7f6bae4c4c73baf2b235b1e40386560c32 Mon Sep 17 00:00:00 2001
 From: Iliana Weller <ilianaw@buttslol.net>
 Date: Tue, 3 Oct 2017 05:16:29 +0000
-Subject: [PATCH 1/2] Use TLSv1.3 by default.
+Subject: [PATCH] Use TLSv1.3 by default.
 
 ---
  ssl/s3_lib.cc       | 2 +-
@@ -23,7 +23,7 @@ index 3df8e1b..53ef05f 100644
  }
  
 diff --git a/ssl/ssl_test.cc b/ssl/ssl_test.cc
-index 4653f73..0f44dab 100644
+index 4da109d..9756250 100644
 --- a/ssl/ssl_test.cc
 +++ b/ssl/ssl_test.cc
 @@ -811,7 +811,7 @@ static void ExpectDefaultVersion(uint16_t min_version, uint16_t max_version,
@@ -63,10 +63,10 @@ index 4653f73..0f44dab 100644
  // The client should gracefully handle no suitable ciphers being enabled.
  TEST(SSLTest, NoCiphersAvailable) {
 diff --git a/ssl/ssl_versions.cc b/ssl/ssl_versions.cc
-index c06a90e..40b4643 100644
+index ccae6ef..7d9c415 100644
 --- a/ssl/ssl_versions.cc
 +++ b/ssl/ssl_versions.cc
-@@ -142,7 +142,7 @@ static bool set_max_version(const SSL_PROTOCOL_METHOD *method, uint16_t *out,
+@@ -199,7 +199,7 @@ static bool set_max_version(const SSL_PROTOCOL_METHOD *method, uint16_t *out,
                              uint16_t version) {
    // Zero is interpreted as the default maximum version.
    if (version == 0) {
