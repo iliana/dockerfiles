@@ -59,18 +59,16 @@ RUN CC="cc -flto" ./configure --user=nginx --group=nginx --with-openssl=boringss
         --without-http_userid_module \
         --without-http_uwsgi_module
 RUN touch boringssl/.openssl/include/openssl/ssl.h \
- && make -j install && cat objs/ngx_modules.c
-WORKDIR /usr/sbin
-RUN mkdir -p /usr/lib/debug/usr/sbin
+ && make -j && cat objs/ngx_modules.c
+RUN make install DESTDIR=/buildroot
+WORKDIR /buildroot/usr/sbin
+RUN mkdir -p /buildroot/usr/lib/debug/usr/sbin
 RUN objcopy --only-keep-debug --compress-debug-sections nginx nginx.debug \
  && objcopy --add-gnu-debuglink=nginx.debug nginx \
- && mv nginx.debug /usr/lib/debug/usr/sbin/ && strip /usr/sbin/nginx
+ && mv nginx.debug /buildroot/usr/lib/debug/usr/sbin/ && strip nginx
 
 FROM alpine:edge
-COPY --from=nginx-builder /usr/sbin/nginx /usr/sbin/
-COPY --from=nginx-builder /usr/lib/debug/usr/sbin/nginx.debug /usr/lib/debug/usr/sbin/
-COPY --from=nginx-builder /etc/nginx/* /etc/nginx/
-COPY --from=nginx-builder /var/lib/nginx/html/* /var/lib/nginx/html/
+COPY --from=nginx-builder /buildroot/ /
 RUN apk add --no-cache pcre zlib \
  && addgroup -S nginx && adduser -D -S -h /var/cache/nginx -s /sbin/nologin -G nginx nginx \
  && rm /etc/passwd- /etc/group- /etc/shadow- \
