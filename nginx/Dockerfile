@@ -78,7 +78,7 @@ RUN find -type f -executable -execdir /usr/src/strip-debug.sh {} \;
 
 FROM alpine:edge
 COPY --from=nginx-builder /buildroot/ /
-RUN apk add --no-cache luajit pcre zlib \
+RUN apk add --no-cache ca-certificates luajit pcre zlib \
  && addgroup -S nginx && adduser -D -S -h /var/cache/nginx -s /sbin/nologin -G nginx nginx \
  && rm /etc/passwd- /etc/group- /etc/shadow- \
  && mkdir -p /run/nginx /var/lib/nginx/logs \
