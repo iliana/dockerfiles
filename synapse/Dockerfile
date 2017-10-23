@@ -3,7 +3,7 @@ RUN echo "%_install_langs en" >/etc/rpm/macros.image-language-conf \
  && dnf install --setopt=deltarpm=0 --setopt=tsflags=nodocs -y \
         gcc git-core libfaketime libffi-devel libjpeg-devel libsodium-devel libxml2-devel \
         libxslt-devel openssl-devel python2-devel python2-virtualenv redhat-rpm-config rpm-build
-ENV SYNAPSE_VERSION="0.23.1"
+ENV SYNAPSE_VERSION="0.24.0-rc1"
 ENV VENV=/buildroot/opt/synapse
 RUN mkdir -p $VENV
 RUN python2 -m virtualenv $VENV
@@ -17,7 +17,9 @@ RUN $VENV/bin/python setup.py bdist_wheel
 RUN SODIUM_INSTALL=system $VENV/bin/pip install dist/*.whl lxml 'Twisted>=17.1.0'
 WORKDIR /buildroot
 ENV RPM_BUILD_ROOT=/buildroot
-RUN find $RPM_BUILD_ROOT | /usr/lib/rpm/redhat/find-requires | grep -v "^$RPM_BUILD_ROOT" | tee $VENV/requires.txt
+RUN /usr/lib/rpm/brp-python-bytecompile
+RUN find $RPM_BUILD_ROOT | /usr/lib/rpm/redhat/find-requires | grep -v "^$RPM_BUILD_ROOT" \
+        | xargs rpm -q --whatprovides --qf='%{name}.%{arch}\n' | sort -u > $VENV/requires.txt
 RUN find $VENV/lib/python2.7/site-packages -type f -executable -exec objcopy --compress-debug-sections {} \;
 
 FROM fedora:latest
@@ -30,5 +32,5 @@ RUN echo "%_install_langs en" >/etc/rpm/macros.image-language-conf \
  && mkdir /data && chown docker:docker /data
 VOLUME ["/data"]
 EXPOSE 8448
-CMD /start.sh
+ENTRYPOINT /start.sh
 USER docker
