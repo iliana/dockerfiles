@@ -1,4 +1,4 @@
-From 9fc35d7f6bae4c4c73baf2b235b1e40386560c32 Mon Sep 17 00:00:00 2001
+From 57c505ea8e1730d20affbe864fb8dd35fbf93a55 Mon Sep 17 00:00:00 2001
 From: Iliana Weller <ilianaw@buttslol.net>
 Date: Tue, 3 Oct 2017 05:16:29 +0000
 Subject: [PATCH] Use TLSv1.3 by default.
@@ -10,20 +10,20 @@ Subject: [PATCH] Use TLSv1.3 by default.
  3 files changed, 8 insertions(+), 4 deletions(-)
 
 diff --git a/ssl/s3_lib.cc b/ssl/s3_lib.cc
-index 3df8e1b..53ef05f 100644
+index f3f99fa..7eb17bc 100644
 --- a/ssl/s3_lib.cc
 +++ b/ssl/s3_lib.cc
-@@ -194,7 +194,7 @@ int ssl3_new(SSL *ssl) {
+@@ -194,7 +194,7 @@ bool ssl3_new(SSL *ssl) {
    // TODO(davidben): Move this field into |s3|, have it store the normalized
    // protocol version, and implement this pre-negotiation quirk in |SSL_version|
    // at the API boundary rather than in internal state.
 -  ssl->version = TLS1_2_VERSION;
 +  ssl->version = TLS1_3_VERSION;
-   return 1;
+   return true;
  }
  
 diff --git a/ssl/ssl_test.cc b/ssl/ssl_test.cc
-index 4da109d..9756250 100644
+index 5e9cde1..afd6932 100644
 --- a/ssl/ssl_test.cc
 +++ b/ssl/ssl_test.cc
 @@ -811,7 +811,7 @@ static void ExpectDefaultVersion(uint16_t min_version, uint16_t max_version,
