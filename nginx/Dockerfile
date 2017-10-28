@@ -1,7 +1,7 @@
 FROM alpine:edge as boringssl-builder
-RUN apk update && apk upgrade && apk add cmake gcc g++ git go ninja perl
+RUN apk update && apk add cmake gcc g++ git go ninja perl
 RUN mkdir /usr/src && git clone https://boringssl.googlesource.com/boringssl /usr/src/boringssl \
- && cd /usr/src/boringssl && git reset --hard f6632dae5fc788ae9a666b5fd31a8754ee6a9e3f
+ && cd /usr/src/boringssl && git reset --hard cb16f17b36d9ee9528a06d2e520374a4f177af4d
 WORKDIR /usr/src/boringssl
 COPY boringssl-*.patch /usr/src/
 RUN git -c user.name=builder -c user.email=builder@docker.invalid am /usr/src/boringssl-*.patch
@@ -9,7 +9,7 @@ RUN mkdir build && cd build && cmake -GNinja -DCMAKE_BUILD_TYPE=Release ..
 RUN cd build && ninja run_tests
 
 FROM alpine:edge as nginx-builder
-RUN apk update && apk upgrade && apk add curl gcc gnupg make musl-dev pcre-dev zlib-dev
+RUN apk update && apk add curl gcc gnupg make musl-dev pcre-dev zlib-dev
 ENV NGINX_VERSION="1.13.6"
 WORKDIR /usr/src
 RUN curl -sSL -O "https://nginx.org/download/nginx-$NGINX_VERSION.tar.gz" \
