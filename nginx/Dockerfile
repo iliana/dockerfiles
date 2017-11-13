@@ -1,7 +1,7 @@
 FROM alpine:edge as boringssl-builder
 RUN apk update && apk add cmake gcc g++ git go ninja perl
 RUN mkdir /usr/src && git clone https://boringssl.googlesource.com/boringssl /usr/src/boringssl \
- && cd /usr/src/boringssl && git reset --hard b2c312d670b9967cf881419758f0ec286b66a25f
+ && cd /usr/src/boringssl && git reset --hard ba8f1864c15ec938ce0851f416663511c89f454a
 WORKDIR /usr/src/boringssl
 COPY boringssl-*.patch /usr/src/
 RUN git -c user.name=builder -c user.email=builder@docker.invalid am /usr/src/boringssl-*.patch
