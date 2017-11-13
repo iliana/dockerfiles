@@ -24,7 +24,7 @@ RUN tar xf "nginx-$NGINX_VERSION.tar.gz"
 RUN git clone https://github.com/simpl/ngx_devel_kit && cd ngx_devel_kit \
  && git reset --hard e443262071e759c047492be60ec7e2d73c5b57ec # v0.3.0
 RUN git clone https://github.com/openresty/lua-nginx-module && cd lua-nginx-module \
- && git reset --hard 97fbeb0bef1aa85e758210d58063376de8eaed31 # v0.10.11rc2
+ && git reset --hard ba2b60593010ad5d552a84f3c3ad3352f232d63d # v0.10.11
 RUN cd lua-nginx-module \
  && git -c user.name=builder -c user.email=builder@docker.invalid am /usr/src/lua-nginx-module-*.patch
 WORKDIR /usr/src/nginx-$NGINX_VERSION
