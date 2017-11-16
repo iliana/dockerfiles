@@ -3,7 +3,7 @@ RUN echo "%_install_langs en" >/etc/rpm/macros.image-language-conf \
  && dnf install --setopt=deltarpm=0 --setopt=tsflags=nodocs -y \
         gcc git-core libfaketime libffi-devel libjpeg-devel libsodium-devel libxml2-devel \
         libxslt-devel openssl-devel python2-devel python2-virtualenv redhat-rpm-config rpm-build
-ENV SYNAPSE_VERSION="0.24.1"
+ENV SYNAPSE_VERSION="0.25.0"
 ENV VENV=/buildroot/opt/synapse
 RUN mkdir -p $VENV
 RUN python2 -m virtualenv $VENV
