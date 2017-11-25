@@ -4,4 +4,4 @@ RUN apk add --no-cache dovecot && mkdir /mail \
 ADD dovecot.conf start.sh /etc/dovecot/
 VOLUME ["/mail"]
 CMD ["/etc/dovecot/start.sh"]
-EXPOSE 143
+EXPOSE 993
