@@ -1,7 +1,7 @@
 FROM alpine:edge as boringssl-builder
 RUN apk update && apk add cmake gcc g++ git go ninja perl
 RUN mkdir /usr/src && git clone https://boringssl.googlesource.com/boringssl /usr/src/boringssl \
- && cd /usr/src/boringssl && git reset --hard ba8f1864c15ec938ce0851f416663511c89f454a
+ && cd /usr/src/boringssl && git reset --hard d8dbde79f9803c4cfce11eadfd49ca1284b49734
 WORKDIR /usr/src/boringssl
 COPY boringssl-*.patch /usr/src/
 RUN git -c user.name=builder -c user.email=builder@docker.invalid am /usr/src/boringssl-*.patch
@@ -10,7 +10,7 @@ RUN cd build && ninja run_tests
 
 FROM alpine:edge as nginx-builder
 RUN apk update && apk add coreutils curl findutils gcc git gnupg luajit-dev make musl-dev pcre-dev zlib-dev
-ENV NGINX_VERSION="1.13.6"
+ENV NGINX_VERSION="1.13.7"
 WORKDIR /usr/src
 RUN curl -sSL -O "https://nginx.org/download/nginx-$NGINX_VERSION.tar.gz" \
               -O "https://nginx.org/download/nginx-$NGINX_VERSION.tar.gz.asc"
@@ -24,7 +24,7 @@ RUN tar xf "nginx-$NGINX_VERSION.tar.gz"
 RUN git clone https://github.com/simpl/ngx_devel_kit && cd ngx_devel_kit \
  && git reset --hard e443262071e759c047492be60ec7e2d73c5b57ec # v0.3.0
 RUN git clone https://github.com/openresty/lua-nginx-module && cd lua-nginx-module \
- && git reset --hard ba2b60593010ad5d552a84f3c3ad3352f232d63d # v0.10.11
+ && git reset --hard 7c7b2e0b1100cd96877c2d1612b572a651b91ae9 # v0.10.12rc1
 RUN cd lua-nginx-module \
  && git -c user.name=builder -c user.email=builder@docker.invalid am /usr/src/lua-nginx-module-*.patch
 WORKDIR /usr/src/nginx-$NGINX_VERSION
