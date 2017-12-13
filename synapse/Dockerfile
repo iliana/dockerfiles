@@ -2,8 +2,9 @@ FROM fedora:latest as builder
 RUN echo "%_install_langs en" >/etc/rpm/macros.image-language-conf \
  && dnf install --setopt=deltarpm=0 --setopt=tsflags=nodocs -y \
         gcc git-core libfaketime libffi-devel libjpeg-devel libsodium-devel libxml2-devel \
-        libxslt-devel openssl-devel python2-devel python2-virtualenv redhat-rpm-config rpm-build
-ENV SYNAPSE_VERSION="0.25.0"
+        libxslt-devel openssl-devel postgresql-devel python2-devel python2-virtualenv \
+        redhat-rpm-config rpm-build
+ENV SYNAPSE_VERSION="0.26.0-rc1"
 ENV VENV=/buildroot/opt/synapse
 RUN mkdir -p $VENV
 RUN python2 -m virtualenv $VENV
@@ -14,7 +15,7 @@ RUN git clone --branch v$SYNAPSE_VERSION https://github.com/matrix-org/synapse
 WORKDIR /synapse
 RUN faketime "$(git tag --format='%(taggerdate:iso)' -l v$SYNAPSE_VERSION)" git tag -v v$SYNAPSE_VERSION
 RUN $VENV/bin/python setup.py bdist_wheel
-RUN SODIUM_INSTALL=system $VENV/bin/pip install dist/*.whl lxml 'Twisted>=17.1.0'
+RUN SODIUM_INSTALL=system $VENV/bin/pip install dist/*.whl lxml 'Twisted>=17.1.0' psycopg2
 WORKDIR /buildroot
 ENV RPM_BUILD_ROOT=/buildroot
 RUN /usr/lib/rpm/brp-python-bytecompile
