@@ -3,7 +3,7 @@ RUN apk update && apk upgrade && apk add git gcc luajit-dev make musl-dev
 RUN mkdir -p /buildroot/usr/lib/lua/5.1 /buildroot/usr/share/lua/5.1
 WORKDIR /usr/src
 RUN git clone https://github.com/openresty/lua-cjson && cd lua-cjson \
- && git reset --hard 55d22ef3bc5f512a9dadd84fd85895824dad73d9 # 2.1.0.5
+ && git reset --hard bcbbb53bf2066c64614127f361e158970a14cab2 # 2.1.0.6rc2
 RUN make -C lua-cjson LUA_INCLUDE_DIR=/usr/include/luajit-2.1 \
  && cp -v lua-cjson/cjson.so /buildroot/usr/lib/lua/5.1/
 RUN git clone https://github.com/openresty/lua-resty-string && cd lua-resty-string \
@@ -15,9 +15,9 @@ RUN git clone https://github.com/bungle/lua-resty-session && cd lua-resty-sessio
 RUN git clone https://github.com/SkyLothar/lua-resty-jwt && cd lua-resty-jwt \
  && git reset --hard ee1d024071f872e2b5a66eaaf9aeaf86c5bab3ed # v0.1.11
 RUN git clone https://github.com/jkeys089/lua-resty-hmac && cd lua-resty-hmac \
- && git reset --hard 6a5b676eae18776f71bb7047a41e5310e918c4cb
+ && git reset --hard 989f601acbe74dee71c1a48f3e140a427f2d03ae
 RUN git clone https://github.com/pingidentity/lua-resty-openidc && cd lua-resty-openidc \
- && git reset --hard fc764690d43ffbcd24fe9d9909f56c77a2d6ac7e # v1.4.1
+ && git reset --hard d4ae56acc758606b8735220d3943c913569ea885 # v1.5.1
 RUN cp -rv \
         lua-resty-string/lib/* \
         lua-resty-http/lib/* \
