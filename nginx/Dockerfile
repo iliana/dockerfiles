@@ -21,12 +21,10 @@ RUN gpg --import /usr/src/mdounin.asc \
  && gpg --batch --verify "nginx-$NGINX_VERSION.tar.gz.asc" "nginx-$NGINX_VERSION.tar.gz" \
  && gpg-connect-agent killagent /bye
 RUN tar xf "nginx-$NGINX_VERSION.tar.gz"
-RUN git clone https://github.com/simpl/ngx_devel_kit && cd ngx_devel_kit \
- && git reset --hard e443262071e759c047492be60ec7e2d73c5b57ec # v0.3.0
+RUN git clone https://github.com/simplresty/ngx_devel_kit && cd ngx_devel_kit \
+ && git reset --hard 682831dbf2bf741e504ffe8d78fa9d8399033aa4 # v0.3.1rc1
 RUN git clone https://github.com/openresty/lua-nginx-module && cd lua-nginx-module \
- && git reset --hard 7c7b2e0b1100cd96877c2d1612b572a651b91ae9 # v0.10.12rc1
-RUN cd lua-nginx-module \
- && git -c user.name=builder -c user.email=builder@docker.invalid am /usr/src/lua-nginx-module-*.patch
+ && git reset --hard c2b6ae2ae3e0ce5b74bf0f659d1ae62635b79935 # v0.10.12rc2
 WORKDIR /usr/src/nginx-$NGINX_VERSION
 COPY --from=boringssl-builder /usr/src/boringssl/build/crypto/libcrypto.so /usr/src/boringssl/build/ssl/libssl.so \
         boringssl/.openssl/lib/
