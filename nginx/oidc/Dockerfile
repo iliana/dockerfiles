@@ -7,7 +7,7 @@ RUN git clone https://github.com/openresty/lua-cjson && cd lua-cjson \
 RUN make -C lua-cjson LUA_INCLUDE_DIR=/usr/include/luajit-2.1 \
  && cp -v lua-cjson/cjson.so /buildroot/usr/lib/lua/5.1/
 RUN git clone https://github.com/openresty/lua-resty-string && cd lua-resty-string \
- && git reset --hard 6c8bf6c01e401699e5bdd5fb208707c5ff62b211 # v0.10
+ && git reset --hard c293b062de175cf7ae4713cc3512f342f55dbfa1 # v0.11rc1
 RUN git clone https://github.com/pintsized/lua-resty-http && cd lua-resty-http \
  && git reset --hard 607ef6b2fbff5112b9acc47d9163635c2fbd8f59 # v0.12
 RUN git clone https://github.com/bungle/lua-resty-session && cd lua-resty-session \
@@ -17,7 +17,7 @@ RUN git clone https://github.com/SkyLothar/lua-resty-jwt && cd lua-resty-jwt \
 RUN git clone https://github.com/jkeys089/lua-resty-hmac && cd lua-resty-hmac \
  && git reset --hard 989f601acbe74dee71c1a48f3e140a427f2d03ae
 RUN git clone https://github.com/pingidentity/lua-resty-openidc && cd lua-resty-openidc \
- && git reset --hard d55c56a6aebb5231a63a67337f90732ed7cc5c9b # v1.5.2
+ && git reset --hard cc66a454e1e63524459a8352c027fb96833d84a6 # v1.5.3
 RUN cp -rv \
         lua-resty-string/lib/* \
         lua-resty-http/lib/* \
