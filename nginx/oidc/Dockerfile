@@ -11,7 +11,7 @@ RUN git clone https://github.com/openresty/lua-resty-string && cd lua-resty-stri
 RUN git clone https://github.com/pintsized/lua-resty-http && cd lua-resty-http \
  && git reset --hard 607ef6b2fbff5112b9acc47d9163635c2fbd8f59 # v0.12
 RUN git clone https://github.com/bungle/lua-resty-session && cd lua-resty-session \
- && git reset --hard e13413b98838fffb9125af66a508b63dda2ab0d5 # v2.19
+ && git reset --hard 4429a06ffac1724a056fafa954c0394d437b261f # v2.22
 RUN git clone https://github.com/SkyLothar/lua-resty-jwt && cd lua-resty-jwt \
  && git reset --hard ee1d024071f872e2b5a66eaaf9aeaf86c5bab3ed # v0.1.11
 RUN git clone https://github.com/jkeys089/lua-resty-hmac && cd lua-resty-hmac \
