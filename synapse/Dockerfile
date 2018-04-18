@@ -1,21 +1,15 @@
 FROM fedora:latest as builder
 RUN echo "%_install_langs en" >/etc/rpm/macros.image-language-conf \
  && dnf install --setopt=deltarpm=0 --setopt=tsflags=nodocs -y \
-        gcc git-core libfaketime libffi-devel libjpeg-devel libsodium-devel libxml2-devel \
+        gcc libffi-devel libjpeg-devel libsodium-devel libxml2-devel \
         libxslt-devel openssl-devel postgresql-devel python2-devel python2-virtualenv \
         redhat-rpm-config rpm-build
-ENV SYNAPSE_VERSION="0.27.2"
+ENV SYNAPSE_VERSION="0.27.4"
 ENV VENV=/buildroot/opt/synapse
 RUN mkdir -p $VENV
 RUN python2 -m virtualenv $VENV
 RUN $VENV/bin/pip install no-manylinux1
-COPY 3ADA06EDC753D11E.asc /
-RUN cat /*.asc | gpg2 --import && git config --global gpg.program gpg2
-RUN git clone --branch v$SYNAPSE_VERSION https://github.com/matrix-org/synapse
-WORKDIR /synapse
-RUN faketime "$(git tag --format='%(taggerdate:iso)' -l v$SYNAPSE_VERSION)" git tag -v v$SYNAPSE_VERSION
-RUN $VENV/bin/python setup.py bdist_wheel
-RUN SODIUM_INSTALL=system $VENV/bin/pip install dist/*.whl lxml 'Twisted>=17.1.0' psycopg2
+RUN SODIUM_INSTALL=system $VENV/bin/pip install https://github.com/matrix-org/synapse/archive/v$SYNAPSE_VERSION.tar.gz lxml 'Twisted>=17.1.0' psycopg2
 WORKDIR /buildroot
 ENV RPM_BUILD_ROOT=/buildroot
 RUN /usr/lib/rpm/brp-python-bytecompile
