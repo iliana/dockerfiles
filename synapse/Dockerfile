@@ -4,7 +4,7 @@ RUN echo "%_install_langs en" >/etc/rpm/macros.image-language-conf \
         gcc libffi-devel libjpeg-devel libsodium-devel libxml2-devel \
         libxslt-devel openssl-devel postgresql-devel python2-devel python2-virtualenv \
         redhat-rpm-config rpm-build
-ENV SYNAPSE_VERSION="0.27.4"
+ENV SYNAPSE_VERSION="0.30.0"
 ENV VENV=/buildroot/opt/synapse
 RUN mkdir -p $VENV
 RUN python2 -m virtualenv $VENV
