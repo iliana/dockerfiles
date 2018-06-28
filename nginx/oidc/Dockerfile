@@ -17,7 +17,7 @@ RUN git clone https://github.com/SkyLothar/lua-resty-jwt && cd lua-resty-jwt \
 RUN git clone https://github.com/jkeys089/lua-resty-hmac && cd lua-resty-hmac \
  && git reset --hard 989f601acbe74dee71c1a48f3e140a427f2d03ae
 RUN git clone https://github.com/pingidentity/lua-resty-openidc && cd lua-resty-openidc \
- && git reset --hard a119260cce1e63774e9c0ad118b2c843b9a9cad2 # v1.5.4
+ && git reset --hard adbf5093373aea3bf34e1aa25fc273a2d3753bd1 # v1.6.0
 RUN cp -rv \
         lua-resty-string/lib/* \
         lua-resty-http/lib/* \
